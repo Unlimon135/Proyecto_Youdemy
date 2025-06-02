@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro - Youdemy</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header>
+    <h1>Bienvenido a Youdemy</h1>
+    <h2>Registro</h2>
+  </header>
+
+  <main>
+    <form class="formulario formulario-auth" id="registerForm">
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" name="nombre" required>
+      
+      <label for="correo">Correo:</label>
+      <input type="email" id="correo" name="correo" required>
+      
+      <label for="contrasena">Contraseña:</label>
+      <input type="password" id="contrasena" name="contrasena" required minlength="6">
+      
+      <label for="confirmarContrasena">Confirmar contraseña:</label>
+      <input type="password" id="confirmarContrasena" name="confirmarContrasena" required minlength="6">
+      
+      <div class="botones-auth">
+        <button type="submit" class="btn">Registrarse</button>
+        <button type="button" class="btn btn-secundario" onclick="window.location.href='login.html'">Ya tengo cuenta</button>
+      </div>
+    </form>
+  </main>
+
+  <script src="auth.js"></script>
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const nombre = document.getElementById('nombre').value;
+      const correo = document.getElementById('correo').value;
+      const contrasena = document.getElementById('contrasena').value;
+      const confirmarContrasena = document.getElementById('confirmarContrasena').value;
+      
+      if (contrasena !== confirmarContrasena) {
+        alert('Las contraseñas no coinciden');
+        return;
+      }
+      
+      if (registrarUsuario(nombre, correo, contrasena)) {
+        alert('Usuario registrado exitosamente. Ahora puedes iniciar sesión.');
+        window.location.href = 'login.html';
+      }
+    });
+  </script>
+</body>
+</html>

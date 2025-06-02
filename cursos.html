@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cursos</title>
+  <link rel="stylesheet" href="estilos.css">
+  <script defer src="auth.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Cursos Disponibles</h1>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="login.html">Iniciar Sesión</a>
+      <button onclick="logout()" class="btn">Cerrar sesión</button>
+    </nav>
+  </header>
+
+  <main>
+    <div id="cursosContainer" class="cursos"></div>
+  </main>
+
+  <footer class="footer">
+    <button class="btn" onclick="mostrarFormulario()">Añadir curso</button>
+  </footer>
+
+  <div id="formularioCurso" class="formulario-curso" style="display: none;">
+    <h3>Nuevo curso</h3>
+    <input type="text" id="titulo" placeholder="Título del curso" required>
+    <input type="text" id="descripcion" placeholder="Descripción" required>
+    <input type="url" id="imagen" placeholder="URL de la imagen (opcional)">
+    <input type="url" id="videoUrl" placeholder="URL del video de YouTube (opcional)">
+    <textarea id="contenido" placeholder="Contenido del curso (separar cada tema con coma)" rows="4" required></textarea>
+    <button onclick="agregarCurso()" class="btn">Guardar</button>
+    <button onclick="cerrarFormulario()" class="btn btn-secundario">Cancelar</button>
+  </div>
+
+  <script>
+    // Función para truncar texto
+    function truncarTexto(texto, maxLength = 80) {
+      if (texto.length <= maxLength) return texto;
+      return texto.substring(0, maxLength).trim() + '...';
+    }
+
+    // Inicializar cursos por defecto si no existen
+    function inicializarCursos() {
+      const cursosExistentes = JSON.parse(localStorage.getItem('cursos'));
+      
+      if (!cursosExistentes || cursosExistentes.length === 0) {
+        const cursosDefault = [
+          {
+            id: 1,
+            titulo: "Curso de HTML Básico",
+            descripcion: "Aprende a crear páginas web con HTML desde cero. Domina las etiquetas fundamentales, estructura de documentos y mejores prácticas.",
+            imagen: "https://via.placeholder.com/300x150?text=HTML+Curso",
+            videoUrl: "https://www.youtube.com/watch?v=kN1XP-Bef7w",
+            contenido: ["Introducción a HTML y CSS", "Etiquetas básicas", "Formularios y tablas", "Introducción a HTML", "Recursividad", "tips de diseño gráfico"]
+          },
+          {
+            id: 2,
+            titulo: "Curso de CSS Moderno",
+            descripcion: "Domina el diseño web con estilos atractivos y modernos. Aprende Flexbox, Grid, animaciones y responsive design para crear interfaces profesionales.",
+            imagen: "https://via.placeholder.com/300x150?text=CSS+Curso",
+            videoUrl: "https://www.youtube.com/watch?v=1Rs2ND1ryYc",
+            contenido: ["Selectores CSS", "Flexbox y Grid", "Animaciones", "Responsive Design", "Variables CSS"]
+          }
+        ];
+        localStorage.setItem('cursos', JSON.stringify(cursosDefault));
+      }
+    }
+
+    // Mostrar todos los cursos
+    function mostrarCursos() {
+      const cursos = JSON.parse(localStorage.getItem('cursos')) || [];
+      const contenedor = document.getElementById('cursosContainer');
+      contenedor.innerHTML = '';
+
+      cursos.forEach(curso => {
+        const card = document.createElement('article');
+        card.className = 'curso';
+
+        const tieneVideo = curso.videoUrl ? '<span class="video-badge">📹 Con video</span>' : '';
+        const descripcionTruncada = truncarTexto(curso.descripcion, 80);
+
+        card.innerHTML = `
+          <div class="curso-header">
+            <h3 class="curso-titulo">${curso.titulo}</h3>
+            <button class="btn-eliminar" onclick="eliminarCurso(${curso.id})" title="Eliminar curso">🗑️</button>
+          </div>
+          <p class="curso-descripcion">${descripcionTruncada}</p>
+          <div class="imagen_curso">
+            <img src="${curso.imagen || 'https://via.placeholder.com/300x150'}" alt="${curso.titulo}">
+            ${tieneVideo}
+          </div>
+          <a href="curso.html?id=${curso.id}" class="btn curso-btn">Ver más</a>
+        `;
+
+        contenedor.appendChild(card);
+      });
+    }
+
+    function mostrarFormulario() {
+      document.getElementById('formularioCurso').style.display = 'block';
+    }
+
+    function cerrarFormulario() {
+      document.getElementById('formularioCurso').style.display = 'none';
+      // Limpiar formulario
+      document.getElementById('titulo').value = '';
+      document.getElementById('descripcion').value = '';
+      document.getElementById('imagen').value = '';
+      document.getElementById('videoUrl').value = '';
+      document.getElementById('contenido').value = '';
+    }
+
+    function agregarCurso() {
+      const titulo = document.getElementById('titulo').value;
+      const descripcion = document.getElementById('descripcion').value;
+      const imagen = document.getElementById('imagen').value;
+      const videoUrl = document.getElementById('videoUrl').value;
+      const contenido = document.getElementById('contenido').value;
+
+      if (!titulo || !descripcion || !contenido) {
+        alert('Por favor completa todos los campos obligatorios.');
+        return;
+      }
+
+      // Validar URL de YouTube si se proporciona
+      if (videoUrl && !validarUrlYoutube(videoUrl)) {
+        alert('Por favor ingresa una URL válida de YouTube');
+        return;
+      }
+
+      const nuevoCurso = {
+        id: Date.now(),
+        titulo,
+        descripcion,
+        imagen: imagen || 'https://via.placeholder.com/300x150',
+        videoUrl: videoUrl || null,
+        contenido: contenido.split(',').map(item => item.trim()).filter(item => item.length > 0)
+      };
+
+      const cursos = JSON.parse(localStorage.getItem('cursos')) || [];
+      cursos.push(nuevoCurso);
+      localStorage.setItem('cursos', JSON.stringify(cursos));
+
+      alert('Curso agregado exitosamente');
+      cerrarFormulario();
+      mostrarCursos();
+    }
+
+    function validarUrlYoutube(url) {
+      const regex = /^(https?\:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
+      return regex.test(url);
+    }
+
+    function eliminarCurso(id) {
+      if (confirm('¿Estás seguro de que quieres eliminar este curso?\n\nEsta acción no se puede deshacer.')) {
+        let cursos = JSON.parse(localStorage.getItem('cursos')) || [];
+        const cursoAEliminar = cursos.find(curso => curso.id === id);
+        
+        if (cursoAEliminar) {
+          // Eliminar el curso del array
+          cursos = cursos.filter(curso => curso.id !== id);
+          localStorage.setItem('cursos', JSON.stringify(cursos));
+          
+          // También eliminar las inscripciones relacionadas con este curso
+          eliminarInscripcionesCurso(id);
+          
+          alert(`Curso "${cursoAEliminar.titulo}" eliminado exitosamente`);
+          mostrarCursos();
+        } else {
+          alert('Error: Curso no encontrado');
+        }
+      }
+    }
+
+    function eliminarInscripcionesCurso(cursoId) {
+      // Obtener todas las claves del localStorage que contengan inscripciones
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('inscripciones_')) {
+          let inscripciones = JSON.parse(localStorage.getItem(key)) || [];
+          // Filtrar las inscripciones para eliminar las del curso eliminado
+          inscripciones = inscripciones.filter(id => id !== cursoId);
+          localStorage.setItem(key, JSON.stringify(inscripciones));
+        }
+      });
+    }
+
+    // Ejecutar al cargar la página
+    document.addEventListener('DOMContentLoaded', () => {
+      inicializarCursos();
+      mostrarCursos();
+    });
+  </script>
+
+  <style>
+    /* Estilos específicos para las tarjetas de cursos estandarizadas */
+    .cursos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 25px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .curso {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border: 2px solid #e0e0e0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      
+      /* Tamaño fijo para estandarizar las tarjetas */
+      width: 320px;
+      height: 400px;
+      
+      display: flex;
+      flex-direction: column;
+      justify-self: center;
+    }
+
+    .curso:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      border-color: #3498db;
+    }
+
+    .curso-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 20px 20px 10px 20px;
+      min-height: 70px;
+    }
+
+    .curso-titulo {
+      margin: 0;
+      font-size: 1.1em;
+      color: #2c3e50;
+      line-height: 1.3;
+      flex: 1;
+      margin-right: 10px;
+      
+      /* Truncar título si es muy largo */
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .curso-descripcion {
+      padding: 0 20px;
+      margin: 0;
+      color: #666;
+      line-height: 1.4;
+      font-size: 0.9em;
+      height: 60px;
+      
+      /* Asegurar que la descripción ocupe exactamente 3 líneas */
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .imagen_curso {
+      position: relative;
+      width: 100%;
+      height: 160px;
+      margin: 15px 0;
+      flex-shrink: 0;
+    }
+
+    .imagen_curso img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .curso-btn {
+      margin: auto 20px 20px 20px;
+      padding: 12px 20px;
+      text-align: center;
+      font-weight: bold;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .curso-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-eliminar {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+      height: fit-content;
+    }
+
+    .btn-eliminar:hover {
+      background: #c0392b;
+      transform: scale(1.05);
+    }
+
+    .video-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #e74c3c;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      font-weight: bold;
+      z-index: 1;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .cursos {
+        grid-template-columns: 1fr;
+        padding: 10px;
+        gap: 20px;
+      }
+      
+      .curso {
+        width: 100%;
+        max-width: 350px;
+        height: 380px;
+      }
+      
+      .curso-header {
+        padding: 15px 15px 8px 15px;
+        min-height: 60px;
+      }
+      
+      .curso-titulo {
+        font-size: 1em;
+      }
+      
+      .curso-descripcion {
+        padding: 0 15px;
+        font-size: 0.85em;
+        height: 55px;
+      }
+      
+      .imagen_curso {
+        height: 140px;
+        margin: 12px 0;
+      }
+      
+      .curso-btn {
+        margin: auto 15px 15px 15px;
+        padding: 10px 15px;
+      }
+    }
+
+    /* Formulario styles */
+    #formularioCurso {
+      max-width: 500px;
+    }
+
+    #formularioCurso input,
+    #formularioCurso textarea {
+      margin-bottom: 10px;
+    }
+
+    #videoUrl {
+      background-color: #fff3cd;
+      border-color: #ffeaa7;
+    }
+
+    #videoUrl::placeholder {
+      color: #856404;
+    }
+  </style>
+</body>
+</html>

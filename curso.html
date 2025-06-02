@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalle del Curso</title>
+  <link rel="stylesheet" href="estilos.css">
+  <script defer src="auth.js"></script>
+</head>
+<body>
+  <header>
+    <h1 id="tituloCurso">Cargando...</h1>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="cursos.html">Cursos</a>
+      <button onclick="logout()" class="btn">Cerrar sesión</button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="curso-layout">
+      <!-- Sección izquierda -->
+      <div class="curso-left">
+        <div class="seccion">
+          <h2>Descripción</h2>
+          <div class="descripcion-box">
+            <p id="descripcionCurso">Cargando descripción...</p>
+          </div>
+        </div>
+
+        <div class="seccion">
+          <h2>Contenido</h2>
+          <div class="contenido-lista" id="listContenido">
+            <!-- El contenido se carga dinámicamente -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección derecha -->
+      <div class="curso-right">
+        <div class="curso-preview">
+          <div class="preview-image">
+            <img id="imagenCurso" src="" alt="Imagen del curso">
+          </div>
+          <button id="btnInscribirse" class="btn btn-inscribir" onclick="inscribirseCurso()">Inscribirme</button>
+          <button id="btnReproducir" class="btn btn-reproducir" onclick="reproducirCurso()" style="display: none;">Reproducir</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal para el video -->
+  <div id="videoModal" class="video-modal" style="display: none;">
+    <div class="video-modal-content">
+      <span class="video-close" onclick="cerrarVideo()">&times;</span>
+      <div class="video-container">
+        <iframe id="videoFrame" src="" frameborder="0" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .curso-layout {
+      display: flex;
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .curso-left {
+      flex: 1;
+      max-width: 500px;
+    }
+
+    .curso-right {
+      flex: 0 0 400px;
+    }
+
+    .seccion {
+      margin-bottom: 30px;
+    }
+
+    .seccion h2 {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      color: #2c3e50;
+    }
+
+    .descripcion-box {
+      border: 2px solid #ddd;
+      padding: 15px;
+      border-radius: 8px;
+      background: #f9f9f9;
+      line-height: 1.6;
+    }
+
+    .contenido-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .contenido-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border: 2px solid #27ae60;
+      border-radius: 8px;
+      background: #f8fff8;
+      font-weight: 500;
+    }
+
+    .contenido-item::before {
+      content: "✅";
+      font-size: 1.2em;
+    }
+
+    .curso-preview {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      border: 2px solid #e0e0e0;
+      position: sticky;
+      top: 20px;
+    }
+
+    .preview-image {
+      width: 100%;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .preview-image img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .btn-inscribir, .btn-reproducir {
+      width: 100%;
+      padding: 15px;
+      font-size: 1.1em;
+      font-weight: bold;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-inscribir {
+      background: #27ae60;
+      color: white;
+    }
+
+    .btn-inscribir:hover {
+      background: #219a52;
+      transform: translateY(-2px);
+    }
+
+    .btn-reproducir {
+      background: #3498db;
+      color: white;
+    }
+
+    .btn-reproducir:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+    }
+
+    /* Modal de video */
+    .video-modal {
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .video-modal-content {
+      position: relative;
+      width: 90%;
+      max-width: 800px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .video-close {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 2001;
+      background: rgba(0,0,0,0.5);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .video-close:hover {
+      background: rgba(0,0,0,0.8);
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    }
+
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .curso-layout {
+        flex-direction: column;
+        padding: 10px;
+      }
+
+      .curso-right {
+        flex: none;
+      }
+
+      .curso-preview {
+        position: static;
+      }
+
+      .video-modal-content {
+        width: 95%;
+        margin: 10px;
+      }
+    }
+  </style>
+
+  <script>
+    let cursoActual = null;
+
+    function obtenerParametroUrl(nombre) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(nombre);
+    }
+
+    function extraerIdYoutube(url) {
+      if (!url) return null;
+      
+      const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+      const match = url.match(regex);
+      return match ? match[1] : null;
+    }
+
+    function cargarCurso() {
+      const cursoId = obtenerParametroUrl('id');
+      
+      if (!cursoId) {
+        alert('Curso no encontrado');
+        window.location.href = 'cursos.html';
+        return;
+      }
+
+      const cursos = JSON.parse(localStorage.getItem('cursos')) || [];
+      cursoActual = cursos.find(curso => curso.id == cursoId);
+
+      if (!cursoActual) {
+        alert('Curso no encontrado');
+        window.location.href = 'cursos.html';
+        return;
+      }
+
+      // Actualizar información del curso
+      document.title = cursoActual.titulo;
+      document.getElementById('tituloCurso').textContent = cursoActual.titulo;
+      document.getElementById('descripcionCurso').textContent = cursoActual.descripcion;
+      document.getElementById('imagenCurso').src = cursoActual.imagen || 'https://via.placeholder.com/400x250';
+      document.getElementById('imagenCurso').alt = cursoActual.titulo;
+
+      // Cargar contenido del curso
+      const listaContenido = document.getElementById('listContenido');
+      listaContenido.innerHTML = '';
+
+      if (cursoActual.contenido && cursoActual.contenido.length > 0) {
+        cursoActual.contenido.forEach(tema => {
+          const div = document.createElement('div');
+          div.className = 'contenido-item';
+          div.textContent = tema;
+          listaContenido.appendChild(div);
+        });
+      }
+
+      // Verificar si el usuario ya está inscrito
+      verificarInscripcion();
+    }
+
+    function verificarInscripcion() {
+      const usuario = localStorage.getItem('usuario');
+      const inscripciones = JSON.parse(localStorage.getItem(`inscripciones_${usuario}`)) || [];
+      
+      if (inscripciones.includes(cursoActual.id)) {
+        document.getElementById('btnInscribirse').style.display = 'none';
+        document.getElementById('btnReproducir').style.display = 'block';
+      }
+    }
+
+    function inscribirseCurso() {
+      const usuario = localStorage.getItem('usuario');
+      
+      if (!usuario) {
+        alert('Debes iniciar sesión para inscribirte');
+        return;
+      }
+
+      // Obtener inscripciones existentes del usuario
+      let inscripciones = JSON.parse(localStorage.getItem(`inscripciones_${usuario}`)) || [];
+      
+      // Agregar curso a inscripciones si no está ya inscrito
+      if (!inscripciones.includes(cursoActual.id)) {
+        inscripciones.push(cursoActual.id);
+        localStorage.setItem(`inscripciones_${usuario}`, JSON.stringify(inscripciones));
+      }
+
+      alert('¡Te has inscrito al curso exitosamente!');
+      
+      // Cambiar botones
+      document.getElementById('btnInscribirse').style.display = 'none';
+      document.getElementById('btnReproducir').style.display = 'block';
+    }
+
+    function reproducirCurso() {
+      if (!cursoActual.videoUrl) {
+        alert('Este curso no tiene video disponible');
+        return;
+      }
+
+      const videoId = extraerIdYoutube(cursoActual.videoUrl);
+      if (!videoId) {
+        alert('URL de video inválida');
+        return;
+      }
+
+      const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      document.getElementById('videoFrame').src = embedUrl;
+      document.getElementById('videoModal').style.display = 'flex';
+    }
+
+    function cerrarVideo() {
+      document.getElementById('videoModal').style.display = 'none';
+      document.getElementById('videoFrame').src = '';
+    }
+
+    // Cerrar modal al hacer clic fuera del video
+    document.getElementById('videoModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        cerrarVideo();
+      }
+    });
+
+    // Cerrar modal con tecla Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        cerrarVideo();
+      }
+    });
+
+    // Cargar curso al inicializar la página
+    document.addEventListener('DOMContentLoaded', cargarCurso);
+  </script>
+</body>
+</html>

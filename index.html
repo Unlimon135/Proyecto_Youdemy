@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Inicio - Youdemy</title>
+  <link rel="stylesheet" href="estilos.css">
+  <script defer src="auth.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Youdemy</h1>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="cursos.html">Cursos</a>
+      <button onclick="logout()" class="btn">Cerrar sesión</button>
+    </nav>
+  </header>
+
+  <main class="bienvenida">
+    <h2>¡Bienvenido de vuelta, <span class="nombre-usuario">Usuario</span>!</h2>
+    <p>Explora nuestros cursos disponibles y comienza tu aprendizaje.</p>
+    <a class="btn" href="cursos.html">Ver Cursos</a>
+    
+    <div class="stats-usuario" style="margin-top: 40px; text-align: center;">
+      <div style="background: white; display: inline-block; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h3 style="color: #2c3e50; margin-bottom: 10px;">Tus Estadísticas</h3>
+        <p id="cursosInscritos" style="color: #27ae60; font-size: 1.2em; margin: 5px 0;">
+          📚 Cursos inscritos: <strong>0</strong>
+        </p>
+        <p style="color: #3498db; font-size: 1em;">
+          🎯 ¡Comienza tu primer curso hoy!
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Obtener información del usuario actual
+      const usuario = obtenerUsuarioActual();
+      
+      if (usuario) {
+        // Mostrar estadísticas del usuario
+        const inscripciones = JSON.parse(localStorage.getItem(`inscripciones_${usuario.correo}`)) || [];
+        document.getElementById('cursosInscritos').innerHTML = `📚 Cursos inscritos: <strong>${inscripciones.length}</strong>`;
+      }
+    });
+  </script>
+</body>
+</html>
